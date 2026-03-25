@@ -77,7 +77,7 @@ func dialWithRetry(ctx context.Context, address string) (*kafka.Conn, error) {
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
-		case <-time.After(time.Second):
+		case <-time.After(2 * time.Second):
 		}
 	}
 
@@ -94,7 +94,10 @@ func createTopicWithRetry(ctx context.Context, controllerAddress, topic string, 
 	}
 
 	// Retry topic creation - KRaft controller may need more time
-	var err error
+	var (
+		err            error
+		controllerConn *kafka.Conn
+	)
 	for attempt := 1; attempt <= 10; attempt++ {
 		select {
 		case <-ctx.Done():
@@ -102,8 +105,10 @@ func createTopicWithRetry(ctx context.Context, controllerAddress, topic string, 
 		default:
 		}
 
-		// Create a fresh connection for each attempt to avoid broken pipe errors
-		controllerConn, err := dialWithRetry(ctx, controllerAddress)
+		// Create a fresh connection for each attempt to avoid broken pipe errors.
+		// Use = (not :=) to update the outer err so the final return can report
+		// the last failure if all retries are exhausted.
+		controllerConn, err = dialWithRetry(ctx, controllerAddress)
 		if err != nil {
 			return fmt.Errorf("failed to connect to broker: %w", err)
 		}
@@ -139,8 +144,5 @@ func createTopicWithRetry(ctx context.Context, controllerAddress, topic string, 
 		return fmt.Errorf("failed to create topic: %w", err)
 	}
 
-	if err != nil {
-		return fmt.Errorf("failed to create topic after %d retries: %w", 10, err)
-	}
-	return fmt.Errorf("failed to create topic after %d retries: unknown error", 10)
+	return fmt.Errorf("failed to create topic after %d retries: %w", 10, err)
 }

@@ -1,0 +1,53 @@
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'LXGWWenKaiMonoGB Nerd Font, monospace',
+  'fontSize': '14px',
+  'background': '#FFFFFF',
+  'mainBkg': '#FFFFFF',
+  'noteBkgColor': '#E8F5E9',
+  'noteTextColor': '#1B5E20',
+  'noteBorderColor': '#66BB6A',
+  'actorBkg': '#E3F2FD',
+  'actorBorder': '#1565C0',
+  'actorTextColor': '#0D47A1',
+  'actorLineColor': '#90CAF9',
+  'signalColor': '#37474F',
+  'signalTextColor': '#263238',
+  'labelBoxBkgColor': '#FFF3E0',
+  'labelBoxBorderColor': '#FB8C00',
+  'labelTextColor': '#E65100',
+  'loopTextColor': '#4A148C',
+  'activationBkgColor': '#E1F5FE',
+  'activationBorderColor': '#0288D1',
+  'sequenceNumberColor': '#FFFFFF',
+  'lineColor': '#78909C'
+}}}%%
+sequenceDiagram
+    autonumber
+    participant RT as ⚙️ Runtime
+    participant PR as 📤 Producer
+    participant KF as 📨 Kafka Topic
+    participant CG as 👥 Consumer Group
+    participant WK as 🔧 Worker Pool
+    participant RP as 🔄 Retry Policy
+    participant CM as ✅ Commit Gate
+
+    rect rgba(232, 245, 233, 0.5)
+        Note over PR,KF: 📤 Produce
+        PR->>KF: [12:07:20-12:07:21] write 10 messages across 3 partitions
+        KF->>CG: [12:07:25] deliver messages to workers
+    end
+
+    rect rgba(255, 243, 224, 0.5)
+        Note over WK,RP: 🔄 Retry
+        WK->>RP: [12:07:25] key-2 fails on attempt 1
+        RP->>WK: bounded backoff then retry
+        WK->>RP: [12:07:25] key-7 fails on attempt 1
+        RP->>WK: bounded backoff then retry
+    end
+
+    rect rgba(200, 230, 201, 0.4)
+        Note over WK,CM: ✅ Commit & Drain
+        WK->>CM: [12:07:25 / 12:07:25] retried messages finally succeed
+        CM->>KF: [12:07:25] frontier advances and commits resume
+        RT->>CG: [12:07:25] catch-up complete, then graceful drain
+    end

@@ -1,0 +1,63 @@
+2026/03/26 12:08:34 Starting Kafka producer/consumer application (commit-failure-stops-intake)...
+2026/03/26 12:08:34 Starting Kafka container programmatically...
+2026/03/26 12:08:34 Using local Kafka image confluentinc/cp-kafka:7.5.0
+2026/03/26 12:08:34 Creating Kafka container...
+2026/03/26 12:08:35 Starting Kafka container...
+2026/03/26 12:08:35 Kafka container started with ID: 60621cc8ffb0
+2026/03/26 12:08:35 Waiting for Kafka to complete startup (checking container logs)...
+2026/03/26 12:08:36 Kafka still starting up... (1s elapsed)
+2026/03/26 12:08:37 Kafka still starting up... (2s elapsed)
+2026/03/26 12:08:38 Kafka still starting up... (3s elapsed)
+2026/03/26 12:08:39 Kafka still starting up... (4s elapsed)
+2026/03/26 12:08:40 ✓ Kafka is ready (startup took 5.003908458s)
+2026/03/26 12:08:40 Recreating topic 'scenario-commit-failure' with 3 partitions...
+2026/03/26 12:08:40 Deleting topic 'scenario-commit-failure' if it exists...
+2026/03/26 12:08:40 Topic 'scenario-commit-failure' does not exist or broker not ready (nothing to delete)
+2026/03/26 12:08:40 Creating topic 'scenario-commit-failure' with 3 partitions...
+2026/03/26 12:08:40 ✓ Created topic 'scenario-commit-failure' with 3 partitions
+2026/03/26 12:08:40 Starting producer...
+2026/03/26 12:08:40 Starting to produce 10 messages across partitions...
+2026/03/26 12:08:40 Starting consumer...
+2026/03/26 12:08:40 Starting consumer group "scenario-commit-failure-group" for topic "scenario-commit-failure"
+kafka-producer 2026/03/26 12:08:40 writing 1 messages to scenario-commit-failure (partition: 0)
+2026/03/26 12:08:40 ✓ Produced message 0 with key 'key-0' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:08:40 writing 1 messages to scenario-commit-failure (partition: 1)
+2026/03/26 12:08:40 ✓ Produced message 1 with key 'key-1' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:08:40 writing 1 messages to scenario-commit-failure (partition: 2)
+2026/03/26 12:08:40 ✓ Produced message 2 with key 'key-2' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:08:40 writing 1 messages to scenario-commit-failure (partition: 0)
+2026/03/26 12:08:40 ✓ Produced message 3 with key 'key-3' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:08:41 writing 1 messages to scenario-commit-failure (partition: 2)
+2026/03/26 12:08:41 ✓ Produced message 4 with key 'key-4' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:08:41 writing 1 messages to scenario-commit-failure (partition: 0)
+2026/03/26 12:08:41 ✓ Produced message 5 with key 'key-5' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:08:41 writing 1 messages to scenario-commit-failure (partition: 1)
+2026/03/26 12:08:41 ✓ Produced message 6 with key 'key-6' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:08:41 writing 1 messages to scenario-commit-failure (partition: 2)
+2026/03/26 12:08:41 ✓ Produced message 7 with key 'key-7' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:08:41 writing 1 messages to scenario-commit-failure (partition: 1)
+2026/03/26 12:08:41 ✓ Produced message 8 with key 'key-8' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:08:42 writing 1 messages to scenario-commit-failure (partition: 2)
+2026/03/26 12:08:42 ✓ Produced message 9 with key 'key-9' to partition (hash-distributed)
+2026/03/26 12:08:42 Successfully produced all 10 messages
+2026/03/26 12:08:42 Producer finished sending messages
+2026/03/26 12:08:42 Producer completed; waiting for consumer to catch up before shutdown...
+2026/03/26 12:08:45 Worker 1 processing partition 2 offset 1 attempt 1
+2026/03/26 12:08:45 ✓ Processed partition 2 offset 1: key=key-4, value=message-4: Hello from Kafka producer at 2026-03-26T12:08:41+08:00
+2026/03/26 12:08:45 Worker 1 processing partition 2 offset 2 attempt 1
+2026/03/26 12:08:45 ✓ Processed partition 2 offset 2: key=key-7, value=message-7: Hello from Kafka producer at 2026-03-26T12:08:41+08:00
+2026/03/26 12:08:45 Worker 1 processing partition 2 offset 3 attempt 1
+2026/03/26 12:08:45 ✓ Processed partition 2 offset 3: key=key-9, value=message-9: Hello from Kafka producer at 2026-03-26T12:08:42+08:00
+2026/03/26 12:08:45 Worker 2 processing partition 2 offset 0 attempt 1
+2026/03/26 12:08:45 ✓ Processed partition 2 offset 0: key=key-2, value=message-2: Hello from Kafka producer at 2026-03-26T12:08:40+08:00
+2026/03/26 12:08:45 Consumer fetch loop stopping because context was cancelled
+2026/03/26 12:08:45 Consumer intake stopped; draining in-flight work for up to 5s
+2026/03/26 12:08:45 All in-flight consumer work drained
+2026/03/26 12:08:47 Consumer catch-up timeout: processed 3/10 messages
+2026/03/26 12:08:47 Consumer stopped after processing 3 messages
+2026/03/26 12:08:47 Closing producer and consumer...
+2026/03/26 12:08:47 Application shutdown complete
+2026/03/26 12:08:47 Closing Kafka runtime...
+2026/03/26 12:08:47 Stopping Kafka container...
+2026/03/26 12:08:48 Kafka container stopped
+2026/03/26 12:08:48 Observed expected scenario error: consumer: commit through offset 3 for partition 2: simulated commit failure for offset 3

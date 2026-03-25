@@ -1,6 +1,6 @@
 module backend_interview_project
 
-go 1.25.4
+go 1.25.3
 
 require (
 	github.com/docker/docker v28.5.2+incompatible

@@ -5,22 +5,29 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/errdefs"
 	"github.com/docker/go-connections/nat"
 )
 
 const (
-	kafkaImage          = "confluentinc/cp-kafka:7.5.0"
-	kafkaContainerName  = "kafka-kraft"
-	KafkaPlaintextPort  = "29092"
-	KafkaControllerPort = "29093"
+	kafkaImagePrimary       = "confluentinc/cp-kafka:7.5.0"
+	kafkaImageMirror        = "docker.1ms.run/confluentinc/cp-kafka:7.5.0"
+	kafkaContainerName      = "kafka-kraft"
+	KafkaPlaintextPort      = "29092"
+	KafkaControllerPort     = "29093"
+	imageInspectTimeout     = 3 * time.Second
+	imagePullAttemptTimeout = 20 * time.Second
 )
 
+// KafkaManager owns the lifecycle of the single-broker Kafka test environment
+// used by both the demo app and the e2e scenario suite.
 type KafkaManager struct {
 	client      *client.Client
 	containerID string
@@ -39,18 +46,15 @@ func NewKafkaManager() (*KafkaManager, error) {
 
 // Start starts a Kafka container with KRaft mode
 func (km *KafkaManager) Start(ctx context.Context) error {
-	log.Println("Pulling Kafka image...")
-	reader, err := km.client.ImagePull(ctx, kafkaImage, image.PullOptions{})
+	imageRef, err := km.ensureKafkaImage(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to pull image: %w", err)
+		return fmt.Errorf("ensure Kafka image: %w", err)
 	}
-	defer reader.Close()
-	io.Copy(io.Discard, reader)
 
 	log.Println("Creating Kafka container...")
 
 	config := &container.Config{
-		Image: kafkaImage,
+		Image: imageRef,
 		Env: []string{
 			"KAFKA_NODE_ID=1",
 			"KAFKA_PROCESS_ROLES=broker,controller",
@@ -102,8 +106,8 @@ func (km *KafkaManager) Start(ctx context.Context) error {
 		for _, name := range c.Names {
 			if name == "/"+kafkaContainerName {
 				log.Printf("Container %s already exists, removing it first...", kafkaContainerName)
-				if err := km.client.ContainerRemove(ctx, c.ID, container.RemoveOptions{Force: true}); err != nil {
-					return fmt.Errorf("failed to remove existing container: %w", err)
+				if removeErr := km.client.ContainerRemove(ctx, c.ID, container.RemoveOptions{Force: true}); removeErr != nil && !errdefs.IsNotFound(removeErr) {
+					return fmt.Errorf("failed to remove existing container: %w", removeErr)
 				}
 				break
 			}
@@ -132,9 +136,44 @@ func (km *KafkaManager) Start(ctx context.Context) error {
 	return nil
 }
 
-// waitForKafkaStartup waits for Kafka to complete startup by checking container logs
+func (km *KafkaManager) ensureKafkaImage(ctx context.Context) (string, error) {
+	for _, imageRef := range []string{kafkaImagePrimary, kafkaImageMirror} {
+		inspectCtx, cancel := context.WithTimeout(ctx, imageInspectTimeout)
+		_, _, err := km.client.ImageInspectWithRaw(inspectCtx, imageRef)
+		cancel()
+		if err == nil {
+			log.Printf("Using local Kafka image %s", imageRef)
+			return imageRef, nil
+		}
+	}
+
+	var lastErr error
+	for _, imageRef := range []string{kafkaImagePrimary, kafkaImageMirror} {
+		pullCtx, cancel := context.WithTimeout(ctx, imagePullAttemptTimeout)
+		log.Printf("Pulling Kafka image %s with timeout %s...", imageRef, imagePullAttemptTimeout)
+		reader, err := km.client.ImagePull(pullCtx, imageRef, image.PullOptions{})
+		if err != nil {
+			cancel()
+			lastErr = err
+			log.Printf("Failed to pull %s: %v", imageRef, err)
+			continue
+		}
+		_, _ = io.Copy(io.Discard, reader)
+		reader.Close()
+		cancel()
+		return imageRef, nil
+	}
+
+	return "", lastErr
+}
+
+// waitForKafkaStartup waits for Kafka to complete startup using a two-phase
+// approach: first it checks container logs for the startup marker, then it
+// verifies the broker is actually accepting TCP connections. This layered
+// strategy guards against both log-format changes across Kafka versions and
+// situations where the process writes the marker before the listener is ready.
 func (km *KafkaManager) waitForKafkaStartup(ctx context.Context) error {
-	log.Println("Waiting for Kafka to complete startup (checking container logs)...")
+	log.Println("Waiting for Kafka to complete startup (checking container logs + TCP probe)...")
 
 	// Wait up to 60 seconds for Kafka to log that it's started
 	timeout := time.After(60 * time.Second)
@@ -146,6 +185,8 @@ func (km *KafkaManager) waitForKafkaStartup(ctx context.Context) error {
 		select {
 		case <-timeout:
 			return fmt.Errorf("kafka did not start within 60 seconds")
+		case <-ctx.Done():
+			return ctx.Err()
 		case <-ticker.C:
 			// Check container logs for startup completion
 			logs, err := km.client.ContainerLogs(ctx, km.containerID, container.LogsOptions{
@@ -158,15 +199,18 @@ func (km *KafkaManager) waitForKafkaStartup(ctx context.Context) error {
 				continue
 			}
 
-			// Read logs to check for startup message
-			buf := make([]byte, 4096)
-			n, _ := logs.Read(buf)
+			// Read all available log bytes so a verbose startup sequence
+			// cannot push the readiness marker past a fixed-size buffer.
+			logBytes, _ := io.ReadAll(logs)
 			logs.Close()
 
-			logContent := string(buf[:n])
-
 			// Look for the message that indicates Kafka is ready
-			if strings.Contains(logContent, "Kafka Server started") {
+			if strings.Contains(string(logBytes), "Kafka Server started") {
+				// Log marker found — now confirm the broker port is reachable.
+				if err := tcpProbe("127.0.0.1:"+KafkaPlaintextPort, 2*time.Second); err != nil {
+					log.Printf("Kafka log shows started but TCP probe failed: %v — retrying", err)
+					continue
+				}
 				elapsed := time.Since(startTime)
 				log.Printf("✓ Kafka is ready (startup took %v)", elapsed)
 				return nil
@@ -175,6 +219,16 @@ func (km *KafkaManager) waitForKafkaStartup(ctx context.Context) error {
 			log.Printf("Kafka still starting up... (%v elapsed)", time.Since(startTime).Round(time.Second))
 		}
 	}
+}
+
+// tcpProbe attempts a TCP dial to addr and closes the connection on success.
+// It returns an error if the connection cannot be established within timeout.
+func tcpProbe(addr string, timeout time.Duration) error {
+	conn, err := net.DialTimeout("tcp", addr, timeout)
+	if err != nil {
+		return err
+	}
+	return conn.Close()
 }
 
 func (km *KafkaManager) Close() error {

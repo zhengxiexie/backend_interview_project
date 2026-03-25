@@ -1,0 +1,56 @@
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'LXGWWenKaiMonoGB Nerd Font, monospace',
+  'fontSize': '14px',
+  'background': '#FFFFFF',
+  'mainBkg': '#FFFFFF',
+  'noteBkgColor': '#E8F5E9',
+  'noteTextColor': '#1B5E20',
+  'noteBorderColor': '#66BB6A',
+  'actorBkg': '#E3F2FD',
+  'actorBorder': '#1565C0',
+  'actorTextColor': '#0D47A1',
+  'actorLineColor': '#90CAF9',
+  'signalColor': '#37474F',
+  'signalTextColor': '#263238',
+  'labelBoxBkgColor': '#FFF3E0',
+  'labelBoxBorderColor': '#FB8C00',
+  'labelTextColor': '#E65100',
+  'loopTextColor': '#4A148C',
+  'activationBkgColor': '#E1F5FE',
+  'activationBorderColor': '#0288D1',
+  'sequenceNumberColor': '#FFFFFF',
+  'lineColor': '#78909C'
+}}}%%
+sequenceDiagram
+    autonumber
+    participant RT as ⚙️ Runtime
+    participant PR as 📤 Producer
+    participant KF as 📨 Kafka Topic
+    participant WK1 as 🔧 Worker offset 1/2
+    participant WK0 as 🔧 Worker offset 0
+    participant ST as 📊 Partition 0 State
+    participant CM as ✅ Commit Gate
+
+    rect rgba(232, 245, 233, 0.5)
+        Note over PR,KF: 📤 Produce
+        PR->>KF: [12:07:51-12:07:52] produce 6 messages
+    end
+
+    rect rgba(227, 242, 253, 0.5)
+        Note over KF,WK0: 📥 Concurrent Dispatch
+        KF->>WK1: [12:07:56] dispatch partition 0 offset 1
+        KF->>WK0: [12:07:56] dispatch partition 0 offset 0
+        WK1->>ST: [12:07:56 / 12:07:56] offset 1 and 2 finish early
+    end
+
+    rect rgba(255, 243, 224, 0.5)
+        Note over ST: 🔄 Gap blocks commit
+        Note over ST: commit is still blocked by offset 0 gap
+        WK0->>ST: [12:07:57] offset 0 finishes late
+    end
+
+    rect rgba(200, 230, 201, 0.4)
+        Note over ST,CM: ✅ Commit
+        ST->>CM: [12:07:57] contiguous frontier closes
+        CM->>KF: commit partition 0 through offset 2
+    end

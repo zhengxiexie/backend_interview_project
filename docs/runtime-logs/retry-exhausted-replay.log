@@ -1,0 +1,49 @@
+2026/03/26 12:07:58 Starting Kafka container programmatically...
+2026/03/26 12:07:58 Using local Kafka image confluentinc/cp-kafka:7.5.0
+2026/03/26 12:07:58 Creating Kafka container...
+2026/03/26 12:07:58 Starting Kafka container...
+2026/03/26 12:07:58 Kafka container started with ID: e2f152cabfd1
+2026/03/26 12:07:58 Waiting for Kafka to complete startup (checking container logs)...
+2026/03/26 12:07:59 Kafka still starting up... (1s elapsed)
+2026/03/26 12:08:00 Kafka still starting up... (2s elapsed)
+2026/03/26 12:08:01 Kafka still starting up... (3s elapsed)
+2026/03/26 12:08:02 Kafka still starting up... (4s elapsed)
+2026/03/26 12:08:03 Kafka still starting up... (5s elapsed)
+2026/03/26 12:08:05 Kafka still starting up... (6s elapsed)
+2026/03/26 12:08:05 Kafka still starting up... (7s elapsed)
+2026/03/26 12:08:06 ✓ Kafka is ready (startup took 8.003244708s)
+2026/03/26 12:08:06 Recreating topic 'scenario-retry-exhausted-replay' with 3 partitions...
+2026/03/26 12:08:06 Deleting topic 'scenario-retry-exhausted-replay' if it exists...
+2026/03/26 12:08:07 Topic 'scenario-retry-exhausted-replay' does not exist or broker not ready (nothing to delete)
+2026/03/26 12:08:07 Creating topic 'scenario-retry-exhausted-replay' with 3 partitions...
+2026/03/26 12:08:07 ✓ Created topic 'scenario-retry-exhausted-replay' with 3 partitions
+2026/03/26 12:08:07 Phase 1: produce messages and force retries to exhaust...
+2026/03/26 12:08:07 Starting to produce 1 messages across partitions...
+kafka-producer 2026/03/26 12:08:07 writing 1 messages to scenario-retry-exhausted-replay (partition: 0)
+2026/03/26 12:08:07 ✓ Produced message 0 with key 'key-0' to partition (hash-distributed)
+2026/03/26 12:08:07 Successfully produced all 1 messages
+2026/03/26 12:08:07 Starting consumer group "scenario-retry-exhausted-replay-group" for topic "scenario-retry-exhausted-replay"
+2026/03/26 12:08:12 Worker 1 processing partition 0 offset 0 attempt 1
+2026/03/26 12:08:12 Message partition 0 offset 0 failed on attempt 1: simulated transient failure for key=key-0 attempt=1; retrying in 100ms
+2026/03/26 12:08:12 Worker 1 processing partition 0 offset 0 attempt 2
+2026/03/26 12:08:12 Message partition 0 offset 0 failed on attempt 2: simulated transient failure for key=key-0 attempt=2; retrying in 200ms
+2026/03/26 12:08:13 Worker 1 processing partition 0 offset 0 attempt 3
+2026/03/26 12:08:13 Message partition 0 offset 0 exhausted retries; leaving offset uncommitted for replay on restart/rebalance
+2026/03/26 12:08:19 Consumer fetch loop stopping because context was cancelled
+2026/03/26 12:08:19 Consumer intake stopped; draining in-flight work for up to 5s
+2026/03/26 12:08:19 All in-flight consumer work drained
+2026/03/26 12:08:19 Consumer stopped after processing 0 messages
+2026/03/26 12:08:19 Phase 1 consumer processed 0 messages before shutdown
+2026/03/26 12:08:19 Phase 2: restart consumer without failure injection to verify replay...
+2026/03/26 12:08:19 Starting consumer group "scenario-retry-exhausted-replay-group" for topic "scenario-retry-exhausted-replay"
+2026/03/26 12:08:19 Worker 1 processing partition 0 offset 0 attempt 1
+2026/03/26 12:08:19 ✓ Processed partition 0 offset 0: key=key-0, value=message-0: Hello from Kafka producer at 2026-03-26T12:08:07+08:00
+2026/03/26 12:08:19 ✓ Committed partition 0 through offset 0
+2026/03/26 12:08:20 Consumer fetch loop stopping because context was cancelled
+2026/03/26 12:08:20 Consumer intake stopped; draining in-flight work for up to 5s
+2026/03/26 12:08:20 All in-flight consumer work drained
+2026/03/26 12:08:20 Consumer stopped after processing 1 messages
+2026/03/26 12:08:20 Phase 2 consumer processed 1 replayed messages
+2026/03/26 12:08:20 Closing Kafka runtime...
+2026/03/26 12:08:20 Stopping Kafka container...
+2026/03/26 12:08:21 Kafka container stopped

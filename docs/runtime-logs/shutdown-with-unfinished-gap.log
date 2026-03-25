@@ -1,0 +1,40 @@
+2026/03/26 12:08:21 Starting Kafka container programmatically...
+2026/03/26 12:08:21 Using local Kafka image confluentinc/cp-kafka:7.5.0
+2026/03/26 12:08:21 Creating Kafka container...
+2026/03/26 12:08:21 Starting Kafka container...
+2026/03/26 12:08:21 Kafka container started with ID: 23017b1e4cb8
+2026/03/26 12:08:21 Waiting for Kafka to complete startup (checking container logs)...
+2026/03/26 12:08:22 Kafka still starting up... (1s elapsed)
+2026/03/26 12:08:23 Kafka still starting up... (2s elapsed)
+2026/03/26 12:08:24 Kafka still starting up... (3s elapsed)
+2026/03/26 12:08:25 ✓ Kafka is ready (startup took 4.004192s)
+2026/03/26 12:08:25 Recreating topic 'scenario-unfinished-gap-replay' with 3 partitions...
+2026/03/26 12:08:25 Deleting topic 'scenario-unfinished-gap-replay' if it exists...
+2026/03/26 12:08:25 Topic 'scenario-unfinished-gap-replay' does not exist or broker not ready (nothing to delete)
+2026/03/26 12:08:25 Creating topic 'scenario-unfinished-gap-replay' with 3 partitions...
+2026/03/26 12:08:25 ✓ Created topic 'scenario-unfinished-gap-replay' with 3 partitions
+2026/03/26 12:08:25 Phase 1: produce messages and cancel consumption before in-flight work finishes...
+2026/03/26 12:08:25 Starting to produce 1 messages across partitions...
+kafka-producer 2026/03/26 12:08:25 writing 1 messages to scenario-unfinished-gap-replay (partition: 0)
+2026/03/26 12:08:25 ✓ Produced message 0 with key 'key-0' to partition (hash-distributed)
+2026/03/26 12:08:25 Successfully produced all 1 messages
+2026/03/26 12:08:25 Starting consumer group "scenario-unfinished-gap-replay-group" for topic "scenario-unfinished-gap-replay"
+2026/03/26 12:08:31 Worker 1 processing partition 0 offset 0 attempt 1
+2026/03/26 12:08:32 Consumer fetch loop stopping because context was cancelled
+2026/03/26 12:08:32 Consumer intake stopped; draining in-flight work for up to 150ms
+2026/03/26 12:08:32 Drain timeout reached with 1 in-flight jobs still active
+2026/03/26 12:08:32 Consumer stopped after processing 0 messages
+2026/03/26 12:08:33 Phase 1 consumer processed 0 messages before drain timeout
+2026/03/26 12:08:33 Phase 2: restart consumer to replay the unfinished gap...
+2026/03/26 12:08:33 Starting consumer group "scenario-unfinished-gap-replay-group" for topic "scenario-unfinished-gap-replay"
+2026/03/26 12:08:33 Worker 1 processing partition 0 offset 0 attempt 1
+2026/03/26 12:08:33 ✓ Processed partition 0 offset 0: key=key-0, value=message-0: Hello from Kafka producer at 2026-03-26T12:08:25+08:00
+2026/03/26 12:08:33 ✓ Committed partition 0 through offset 0
+2026/03/26 12:08:33 Consumer fetch loop stopping because context was cancelled
+2026/03/26 12:08:33 Consumer intake stopped; draining in-flight work for up to 150ms
+2026/03/26 12:08:33 All in-flight consumer work drained
+2026/03/26 12:08:33 Consumer stopped after processing 1 messages
+2026/03/26 12:08:33 Phase 2 consumer processed 1 replayed messages
+2026/03/26 12:08:33 Closing Kafka runtime...
+2026/03/26 12:08:33 Stopping Kafka container...
+2026/03/26 12:08:34 Kafka container stopped

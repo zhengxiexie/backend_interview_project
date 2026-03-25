@@ -1,0 +1,66 @@
+2026/03/26 12:07:42 Starting Kafka producer/consumer application (out-of-order-frontier)...
+2026/03/26 12:07:42 Starting Kafka container programmatically...
+2026/03/26 12:07:42 Using local Kafka image confluentinc/cp-kafka:7.5.0
+2026/03/26 12:07:42 Creating Kafka container...
+2026/03/26 12:07:42 Container kafka-kraft already exists, removing it first...
+2026/03/26 12:07:42 Starting Kafka container...
+2026/03/26 12:07:42 Kafka container started with ID: 25b434966b1f
+2026/03/26 12:07:42 Waiting for Kafka to complete startup (checking container logs)...
+2026/03/26 12:07:43 Kafka still starting up... (1s elapsed)
+2026/03/26 12:07:44 Kafka still starting up... (2s elapsed)
+2026/03/26 12:07:45 Kafka still starting up... (3s elapsed)
+2026/03/26 12:07:46 Kafka still starting up... (4s elapsed)
+2026/03/26 12:07:47 Kafka still starting up... (5s elapsed)
+2026/03/26 12:07:48 Kafka still starting up... (6s elapsed)
+2026/03/26 12:07:49 Kafka still starting up... (7s elapsed)
+2026/03/26 12:07:50 ✓ Kafka is ready (startup took 8.006602959s)
+2026/03/26 12:07:50 Recreating topic 'scenario-out-of-order' with 3 partitions...
+2026/03/26 12:07:50 Deleting topic 'scenario-out-of-order' if it exists...
+2026/03/26 12:07:50 Topic 'scenario-out-of-order' does not exist or broker not ready (nothing to delete)
+2026/03/26 12:07:50 Creating topic 'scenario-out-of-order' with 3 partitions...
+2026/03/26 12:07:50 ✓ Created topic 'scenario-out-of-order' with 3 partitions
+2026/03/26 12:07:50 Starting producer...
+2026/03/26 12:07:50 Starting to produce 6 messages across partitions...
+2026/03/26 12:07:50 Starting consumer...
+2026/03/26 12:07:50 Starting consumer group "scenario-out-of-order-group" for topic "scenario-out-of-order"
+kafka-producer 2026/03/26 12:07:51 writing 1 messages to scenario-out-of-order (partition: 0)
+2026/03/26 12:07:51 ✓ Produced message 0 with key 'key-0' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:07:51 writing 1 messages to scenario-out-of-order (partition: 1)
+2026/03/26 12:07:51 ✓ Produced message 1 with key 'key-1' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:07:51 writing 1 messages to scenario-out-of-order (partition: 2)
+2026/03/26 12:07:51 ✓ Produced message 2 with key 'key-2' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:07:51 writing 1 messages to scenario-out-of-order (partition: 0)
+2026/03/26 12:07:51 ✓ Produced message 3 with key 'key-3' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:07:51 writing 1 messages to scenario-out-of-order (partition: 2)
+2026/03/26 12:07:51 ✓ Produced message 4 with key 'key-4' to partition (hash-distributed)
+kafka-producer 2026/03/26 12:07:52 writing 1 messages to scenario-out-of-order (partition: 0)
+2026/03/26 12:07:52 ✓ Produced message 5 with key 'key-5' to partition (hash-distributed)
+2026/03/26 12:07:52 Successfully produced all 6 messages
+2026/03/26 12:07:52 Producer finished sending messages
+2026/03/26 12:07:52 Producer completed; waiting for consumer to catch up before shutdown...
+2026/03/26 12:07:56 Worker 3 processing partition 0 offset 0 attempt 1
+2026/03/26 12:07:56 Worker 1 processing partition 0 offset 1 attempt 1
+2026/03/26 12:07:56 Worker 2 processing partition 0 offset 2 attempt 1
+2026/03/26 12:07:56 ✓ Processed partition 0 offset 2: key=key-5, value=message-5: Hello from Kafka producer at 2026-03-26T12:07:51+08:00
+2026/03/26 12:07:56 Worker 2 processing partition 1 offset 0 attempt 1
+2026/03/26 12:07:56 ✓ Processed partition 0 offset 1: key=key-3, value=message-3: Hello from Kafka producer at 2026-03-26T12:07:51+08:00
+2026/03/26 12:07:56 Worker 1 processing partition 2 offset 0 attempt 1
+2026/03/26 12:07:56 ✓ Processed partition 1 offset 0: key=key-1, value=message-1: Hello from Kafka producer at 2026-03-26T12:07:51+08:00
+2026/03/26 12:07:56 ✓ Processed partition 2 offset 0: key=key-2, value=message-2: Hello from Kafka producer at 2026-03-26T12:07:51+08:00
+2026/03/26 12:07:56 ✓ Committed partition 1 through offset 0
+2026/03/26 12:07:56 Worker 2 processing partition 2 offset 1 attempt 1
+2026/03/26 12:07:56 ✓ Processed partition 2 offset 1: key=key-4, value=message-4: Hello from Kafka producer at 2026-03-26T12:07:51+08:00
+2026/03/26 12:07:56 ✓ Committed partition 2 through offset 0
+2026/03/26 12:07:56 ✓ Committed partition 2 through offset 1
+2026/03/26 12:07:57 ✓ Processed partition 0 offset 0: key=key-0, value=message-0: Hello from Kafka producer at 2026-03-26T12:07:50+08:00
+2026/03/26 12:07:57 ✓ Committed partition 0 through offset 2
+2026/03/26 12:07:57 Consumer caught up: processed 6/6 messages
+2026/03/26 12:07:57 Consumer fetch loop stopping because context was cancelled
+2026/03/26 12:07:57 Consumer intake stopped; draining in-flight work for up to 7s
+2026/03/26 12:07:57 All in-flight consumer work drained
+2026/03/26 12:07:57 Consumer stopped after processing 6 messages
+2026/03/26 12:07:57 Closing producer and consumer...
+2026/03/26 12:07:57 Application shutdown complete
+2026/03/26 12:07:57 Closing Kafka runtime...
+2026/03/26 12:07:57 Stopping Kafka container...
+2026/03/26 12:07:58 Kafka container stopped

@@ -1,0 +1,54 @@
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'LXGWWenKaiMonoGB Nerd Font, monospace',
+  'fontSize': '14px',
+  'background': '#FFFFFF',
+  'mainBkg': '#FFFFFF',
+  'noteBkgColor': '#E8F5E9',
+  'noteTextColor': '#1B5E20',
+  'noteBorderColor': '#66BB6A',
+  'actorBkg': '#E3F2FD',
+  'actorBorder': '#1565C0',
+  'actorTextColor': '#0D47A1',
+  'actorLineColor': '#90CAF9',
+  'signalColor': '#37474F',
+  'signalTextColor': '#263238',
+  'labelBoxBkgColor': '#FFF3E0',
+  'labelBoxBorderColor': '#FB8C00',
+  'labelTextColor': '#E65100',
+  'loopTextColor': '#4A148C',
+  'activationBkgColor': '#E1F5FE',
+  'activationBorderColor': '#0288D1',
+  'sequenceNumberColor': '#FFFFFF',
+  'lineColor': '#78909C'
+}}}%%
+sequenceDiagram
+    autonumber
+    participant RT as ⚙️ Runtime
+    participant PR as 📤 Producer
+    participant KF as 📨 Kafka Topic
+    participant C1 as 👤 Phase 1 Consumer
+    participant RP as 🔄 Retry Policy
+    participant C2 as 🔁 Replay Consumer
+    participant CM as ✅ Commit Gate
+
+    rect rgba(232, 245, 233, 0.5)
+        Note over PR,C1: 📤 Produce & Deliver
+        PR->>KF: [12:08:07] produce key-0 once
+        KF->>C1: [12:08:07] deliver offset 0 to phase 1 consumer
+    end
+
+    rect rgba(255, 243, 224, 0.5)
+        Note over C1,RP: 🔄 Retry Exhaustion
+        C1->>RP: [12:08:12] attempt 1 fails
+        RP->>C1: [12:08:12] retry with 100ms backoff
+        C1->>RP: [12:08:12] attempt 2 fails
+        RP->>C1: retry with 200ms backoff
+        C1-->>KF: [12:08:13] retries exhausted, leave offset uncommitted
+    end
+
+    rect rgba(243, 229, 245, 0.5)
+        Note over RT,CM: 🔁 Replay
+        RT->>C2: [12:08:19] start replay consumer
+        C2->>CM: [12:08:20] replayed offset 0 succeeds
+        CM->>KF: [12:08:19] commit replayed message
+    end

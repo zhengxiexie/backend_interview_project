@@ -1,0 +1,53 @@
+%%{init: {'theme': 'base', 'themeVariables': {
+  'fontFamily': 'LXGWWenKaiMonoGB Nerd Font, monospace',
+  'fontSize': '14px',
+  'background': '#FFFFFF',
+  'mainBkg': '#FFFFFF',
+  'noteBkgColor': '#E8F5E9',
+  'noteTextColor': '#1B5E20',
+  'noteBorderColor': '#66BB6A',
+  'actorBkg': '#E3F2FD',
+  'actorBorder': '#1565C0',
+  'actorTextColor': '#0D47A1',
+  'actorLineColor': '#90CAF9',
+  'signalColor': '#37474F',
+  'signalTextColor': '#263238',
+  'labelBoxBkgColor': '#FFF3E0',
+  'labelBoxBorderColor': '#FB8C00',
+  'labelTextColor': '#E65100',
+  'loopTextColor': '#4A148C',
+  'activationBkgColor': '#E1F5FE',
+  'activationBorderColor': '#0288D1',
+  'sequenceNumberColor': '#FFFFFF',
+  'lineColor': '#78909C'
+}}}%%
+sequenceDiagram
+    autonumber
+    participant RT as ⚙️ Runtime
+    participant PR as 📤 Producer
+    participant KF as 📨 Kafka Topic
+    participant C1 as 👤 Phase 1 Consumer
+    participant WK as 🔧 In-flight Worker
+    participant C2 as 🔁 Replay Consumer
+    participant CM as ✅ Commit Gate
+
+    rect rgba(232, 245, 233, 0.5)
+        Note over PR,WK: 📤 Produce & Process
+        PR->>KF: [12:08:25] produce key-0 once
+        KF->>C1: [12:08:25] start phase 1 consumer
+        C1->>WK: [12:08:31] begin processing offset 0
+    end
+
+    rect rgba(255, 243, 224, 0.5)
+        Note over RT,C1: 🔄 Drain Timeout
+        RT->>C1: [12:08:32] stop intake while work is still active
+        C1-->>RT: [12:08:32] drain timeout with one in-flight job left
+    end
+
+    rect rgba(243, 229, 245, 0.5)
+        Note over RT,CM: 🔁 Replay
+        RT->>C2: [12:08:33] restart consumer for replay
+        C2->>WK: [12:08:33] replay offset 0 from Kafka
+        WK->>CM: offset 0 completes safely
+        CM->>KF: [12:08:33] commit replayed message
+    end
